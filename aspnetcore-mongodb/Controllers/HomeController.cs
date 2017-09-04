@@ -21,6 +21,16 @@ namespace aspnetcore_mongodb.Controllers
 
         public IActionResult About()
         {
+            MongoDBContext dbContext = new MongoDBContext();
+            var entity = new Post
+            {
+                Content = "Without Id",
+                Title = "No ID Title",
+                ReadCount = 100,
+            };
+            dbContext.Posts.InsertOne(entity);
+
+
             ViewData["Message"] = "Your application description page.";
 
             return View();
@@ -37,5 +47,47 @@ namespace aspnetcore_mongodb.Controllers
         {
             return View();
         }
+        
+        public IActionResult Book()
+        {
+            MongoDBContext dbContext = new MongoDBContext();
+
+            List<Post> postList = dbContext.Posts.Find(m => true).ToList();
+
+            var book = new Book()
+            {
+                Title = "Test Book 2",
+                Posts =postList
+            };
+
+            dbContext.Books.InsertOne(book);
+
+            return Redirect("/");
+        }
+
+        public IActionResult Update()
+        {
+            MongoDBContext dbContext = new MongoDBContext();
+
+            var newPost = new Post
+            {
+                Title = "Updated",
+                Content = "This is awesome",
+                ReadCount = 1
+            };
+
+            var test = dbContext.Posts.Find(p => p.Title == "My Title").FirstOrDefault();
+
+            dbContext.Books.FindOneAndUpdate(x => x.Title == "Test Book 1" && x.Posts.Any(p => p.Title == "Updated"),
+                                                                Builders<Book>.Update.Set(x => x.Posts[-1], newPost));
+
+
+
+            return Redirect("/");
+        }
+
+
+
+
     }
 }

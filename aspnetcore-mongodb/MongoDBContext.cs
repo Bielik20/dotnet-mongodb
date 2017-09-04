@@ -40,5 +40,13 @@ namespace aspnetcore_mongodb
                 return _database.GetCollection<Post>("Posts");
             }
         }
+
+        public IMongoCollection<Book> Books
+        {
+            get
+            {
+                return _database.GetCollection<Book>("Books");
+            }
+        }
     }
 }
