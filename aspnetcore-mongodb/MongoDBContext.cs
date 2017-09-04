@@ -1,4 +1,5 @@
 ﻿using aspnetcore_mongodb.Models;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -9,23 +10,21 @@ namespace aspnetcore_mongodb
 {
     public class MongoDBContext
     {
-        public static string ConnectionString { get; set; }
-        public static string DatabaseName { get; set; }
-        public static bool IsSSL { get; set; }
-
+        private MongoDBOptions _options;
         private IMongoDatabase _database { get; }
 
-        public MongoDBContext()
+        public MongoDBContext(IOptions<MongoDBOptions> options)
         {
+            _options = options.Value;
             try
             {
-                MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(ConnectionString));
-                if (IsSSL)
+                MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(_options.ConnectionString));
+                if (_options.IsSSL)
                 {
                     settings.SslSettings = new SslSettings { EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 };
                 }
                 var mongoClient = new MongoClient(settings);
-                _database = mongoClient.GetDatabase(DatabaseName);
+                _database = mongoClient.GetDatabase(_options.DatabaseName);
             }
             catch (Exception ex)
             {

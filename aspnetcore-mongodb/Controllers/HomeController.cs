@@ -13,25 +13,29 @@ namespace aspnetcore_mongodb.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly MongoDBContext _context;
+
+        public HomeController(MongoDBContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-
-            List<Post> postList = dbContext.Posts.Find(m => true).ToList();
+            List<Post> postList = _context.Posts.Find(m => true).ToList();
 
             return View();
         }
 
         public IActionResult About()
         {
-            MongoDBContext dbContext = new MongoDBContext();
             var entity = new Post
             {
                 Content = "Without Id",
                 Title = "No ID Title",
                 ReadCount = 100,
             };
-            dbContext.Posts.InsertOne(entity);
+            _context.Posts.InsertOne(entity);
 
 
             ViewData["Message"] = "Your application description page.";
@@ -53,8 +57,6 @@ namespace aspnetcore_mongodb.Controllers
 
         public async Task<IActionResult> Post()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-
             var post1 = new Post()
             {
                 Title = "First One",
@@ -74,18 +76,16 @@ namespace aspnetcore_mongodb.Controllers
                 ReadCount = 10
             };
 
-            await dbContext.Posts.InsertOneAsync(post1);
-            await dbContext.Posts.InsertOneAsync(post2);
-            await dbContext.Posts.InsertOneAsync(post3);
+            await _context.Posts.InsertOneAsync(post1);
+            await _context.Posts.InsertOneAsync(post2);
+            await _context.Posts.InsertOneAsync(post3);
 
             return Redirect("/");
         }
 
         public IActionResult Book()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-
-            List<Post> postList = dbContext.Posts.Find(m => true).ToList();
+            List<Post> postList = _context.Posts.Find(m => true).ToList();
 
             var book = new Book()
             {
@@ -93,16 +93,14 @@ namespace aspnetcore_mongodb.Controllers
                 Posts = postList
             };
 
-            dbContext.Books.InsertOne(book);
+            _context.Books.InsertOne(book);
 
             return Redirect("/");
         }
 
         public async Task<IActionResult> Update()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var query = from k in (from a in dbContext.Books.AsQueryable<Book>()
+            var query = from k in (from a in _context.Books.AsQueryable()
                                     where a.Title == "Test Book 2"
                                     from b in a.Posts
                                     select b)
@@ -111,7 +109,7 @@ namespace aspnetcore_mongodb.Controllers
             var result = await query.FirstOrDefaultAsync();
             result.ReadCount = 5;
 
-            dbContext.Books
+            _context.Books
                 .FindOneAndUpdate(x => x.Title == "Test Book 2" && x.Posts.Any(p => p.Title == "Second One"),
                                     Builders<Book>.Update.Set(x => x.Posts[-1], result));
 
@@ -120,9 +118,7 @@ namespace aspnetcore_mongodb.Controllers
 
         public async Task<IActionResult> UpdateWithId()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var query = from k in (from a in dbContext.Books.AsQueryable<Book>()
+            var query = from k in (from a in _context.Books.AsQueryable<Book>()
                                    from b in a.Posts
                                    select b)
                         where k.Id == ObjectId.Parse("59ad72cbd33da61a704237c9")
@@ -130,7 +126,7 @@ namespace aspnetcore_mongodb.Controllers
             var result = await query.FirstOrDefaultAsync();
             result.ReadCount = 7;
 
-            dbContext.Books
+            _context.Books
                 .FindOneAndUpdate(x => x.Title == "Test Book 2" && x.Posts.Any(p => p.Title == "Third One"),
                                     Builders<Book>.Update.Set(x => x.Posts[-1], result));
 
