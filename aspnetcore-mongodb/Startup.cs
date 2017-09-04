@@ -27,6 +27,9 @@ namespace aspnetcore_mongodb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            MongoDBContext.ConnectionString = Configuration.GetSection("MongoConnection:ConnectionString").Value;
+            MongoDBContext.DatabaseName = Configuration.GetSection("MongoConnection:DatabaseName").Value;
+            MongoDBContext.IsSSL = Convert.ToBoolean(Configuration.GetSection("MongoConnection:IsSSL").Value);
             // Add framework services.
             services.AddMvc();
         }

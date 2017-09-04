@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using aspnetcore_mongodb.Models;
+using MongoDB.Driver;
 
 namespace aspnetcore_mongodb.Controllers
 {
@@ -10,6 +12,10 @@ namespace aspnetcore_mongodb.Controllers
     {
         public IActionResult Index()
         {
+            MongoDBContext dbContext = new MongoDBContext();
+
+            List<Post> postList = dbContext.Posts.Find(m => true).ToList();
+
             return View();
         }
 
