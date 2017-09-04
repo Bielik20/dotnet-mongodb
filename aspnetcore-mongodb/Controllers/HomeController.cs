@@ -69,17 +69,18 @@ namespace aspnetcore_mongodb.Controllers
         {
             MongoDBContext dbContext = new MongoDBContext();
 
-            var newPost = new Post
-            {
-                Title = "Updated",
-                Content = "This is awesome",
-                ReadCount = 1
-            };
+            var test = dbContext.Books.AsQueryable<Book>().Where(x => x.Title == "Test Book 1" && x.Posts.Any(p => p.Title == "Updated")).Select(b => b.Posts).FirstOrDefault();
+            //var newPost = new Post
+            //{
+            //    Id = new Guid(),
+            //    Title = "Updated",
+            //    Content = "This is awesome",
+            //    ReadCount = 1
+            //};
 
-            var test = dbContext.Posts.Find(p => p.Title == "My Title").FirstOrDefault();
 
-            dbContext.Books.FindOneAndUpdate(x => x.Title == "Test Book 1" && x.Posts.Any(p => p.Title == "Updated"),
-                                                                Builders<Book>.Update.Set(x => x.Posts[-1], newPost));
+            //dbContext.Books.FindOneAndUpdate(x => x.Title == "Test Book 1" && x.Posts.Any(p => p.Title == "Updated"),
+            //                                                    Builders<Book>.Update.Set(x => x.Posts[-1], newPost));
 
 
 
