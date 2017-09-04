@@ -51,6 +51,36 @@ namespace aspnetcore_mongodb.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Post()
+        {
+            MongoDBContext dbContext = new MongoDBContext();
+
+            var post1 = new Post()
+            {
+                Title = "First One",
+                Content = "Try to beat me",
+                ReadCount = 10
+            };
+            var post2 = new Post()
+            {
+                Title = "Second One",
+                Content = "How do you like them apples",
+                ReadCount = 10
+            };
+            var post3 = new Post()
+            {
+                Title = "Third One",
+                Content = "With friends like this",
+                ReadCount = 10
+            };
+
+            await dbContext.Posts.InsertOneAsync(post1);
+            await dbContext.Posts.InsertOneAsync(post2);
+            await dbContext.Posts.InsertOneAsync(post3);
+
+            return Redirect("/");
+        }
+
         public IActionResult Book()
         {
             MongoDBContext dbContext = new MongoDBContext();
@@ -72,60 +102,20 @@ namespace aspnetcore_mongodb.Controllers
         {
             MongoDBContext dbContext = new MongoDBContext();
 
-            //var test = dbContext.Books.AsQueryable<Book>()
-            //            .Where(x => x.Title == "Test Book 1")
-            //            .Select(b => b.Posts.Where(p => p.Title == "No ID Title"))
-            //            .ToList();
-
-            var test = dbContext.Books.Find(b => b.Title == "Test Book 1" && b.Posts.Any(x => x.Title == "Updated"))
-                        .Project(b => b.Posts)
-                        .FirstOrDefault();
-
-            //var filter = Builders<Book>.Filter.Eq("Posts.Title", "Updated");
-            //var projection = Builders<Book>.Projection.Include("Posts.$").Exclude("_id");
-            //var post = dbContext.Books.Find(filter).Project(projection).SingleOrDefault();
-
-            //var query = from b in dbContext.Books.AsQueryable()
-            //            where b.Title == "Test Book 2"
-            //            from p in b.Posts.AsQueryable()
-            //            where p.Title == "No ID Title"
-            //            select p;
-            //var test2 = query.FirstOrDefault();
-
-            //var test3 = dbContext.Books.AsQueryable()
-            //            .SelectMany(b => b.Posts, (b, p) => new { Book = b, Post = p })
-            //            .Where(x => x.Book.Title == "Test Book 2" && x.Post.Title == "Updated")
-            //            .Select(x => x.Post)
-            //            .FirstOrDefault();
-
-            var result = from k in (from a in dbContext.Books.AsQueryable<Book>()
+            var query = from k in (from a in dbContext.Books.AsQueryable<Book>()
                                     where a.Title == "Test Book 2"
                                     from b in a.Posts
                                     select b)
-                         where k.Title == "No ID Title"
+                         where k.Title == "Second One"
                          select k;
-            var test2 = await result.FirstOrDefaultAsync();
+            var result = await query.FirstOrDefaultAsync();
+            result.ReadCount = 5;
 
-
-            //var newPost = new Post
-            //{
-            //    Id = new Guid(),
-            //    Title = "Updated",
-            //    Content = "This is awesome",
-            //    ReadCount = 1
-            //};
-
-
-            //dbContext.Books.FindOneAndUpdate(x => x.Title == "Test Book 1" && x.Posts.Any(p => p.Title == "Updated"),
-            //                                                    Builders<Book>.Update.Set(x => x.Posts[-1], newPost));
-
-
+            dbContext.Books
+                .FindOneAndUpdate(x => x.Title == "Test Book 2" && x.Posts.Any(p => p.Title == "Second One"),
+                                    Builders<Book>.Update.Set(x => x.Posts[-1], result));
 
             return Redirect("/");
         }
-
-
-
-
     }
 }
