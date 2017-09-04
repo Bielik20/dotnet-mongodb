@@ -7,6 +7,7 @@ using aspnetcore_mongodb.Models;
 using MongoDB.Driver;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
+using MongoDB.Driver.Linq;
 
 namespace aspnetcore_mongodb.Controllers
 {
@@ -67,7 +68,7 @@ namespace aspnetcore_mongodb.Controllers
             return Redirect("/");
         }
 
-        public IActionResult Update()
+        public async Task<IActionResult> Update()
         {
             MongoDBContext dbContext = new MongoDBContext();
 
@@ -97,12 +98,14 @@ namespace aspnetcore_mongodb.Controllers
             //            .Select(x => x.Post)
             //            .FirstOrDefault();
 
-            var result = from k in (from a in dbContext.Books.AsQueryable()
+            var result = from k in (from a in dbContext.Books.AsQueryable<Book>()
+                                    where a.Title == "Test Book 2"
                                     from b in a.Posts
                                     select b)
-                         where k.Title == "Updated"
+                         where k.Title == "No ID Title"
                          select k;
-            var test2 = result.FirstOrDefault();
+            var test2 = await result.FirstOrDefaultAsync();
+
 
             //var newPost = new Post
             //{
