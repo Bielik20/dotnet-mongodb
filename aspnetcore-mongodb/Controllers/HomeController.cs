@@ -117,5 +117,24 @@ namespace aspnetcore_mongodb.Controllers
 
             return Redirect("/");
         }
+
+        public async Task<IActionResult> UpdateWithId()
+        {
+            MongoDBContext dbContext = new MongoDBContext();
+
+            var query = from k in (from a in dbContext.Books.AsQueryable<Book>()
+                                   from b in a.Posts
+                                   select b)
+                        where k.Id == ObjectId.Parse("59ad72cbd33da61a704237c9")
+                        select k;
+            var result = await query.FirstOrDefaultAsync();
+            result.ReadCount = 7;
+
+            dbContext.Books
+                .FindOneAndUpdate(x => x.Title == "Test Book 2" && x.Posts.Any(p => p.Title == "Third One"),
+                                    Builders<Book>.Update.Set(x => x.Posts[-1], result));
+
+            return Redirect("/");
+        }
     }
 }
