@@ -55,6 +55,20 @@ namespace aspnetcore_mongodb.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ListSample()
+        {
+            //var listSample = new ListSample();
+            //listSample.ListOfEnums = new List<AntiCoagulantAntiPlateletAndFibrinolyticEnum>();
+            //listSample.ListOfEnums.Add(AntiCoagulantAntiPlateletAndFibrinolyticEnum.A10);
+            //listSample.ListOfEnums.Add(AntiCoagulantAntiPlateletAndFibrinolyticEnum.A3);
+
+            //await _context.ListSample.InsertOneAsync(listSample);
+
+            var test = await _context.Collection<ListSample>().Find(x => true).ToListAsync();
+
+            return Redirect("/");
+        }
+
         public async Task<IActionResult> Post()
         {
             var post1 = new Post()
